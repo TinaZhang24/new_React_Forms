@@ -1,35 +1,40 @@
-import { useState } from 'react'
-import reactLogo from './assets/react.svg'
-import viteLogo from '/vite.svg'
-import './App.css'
+import { useState } from "react";
+import SignUpForm from "./SignUpForm";
 
-function App() {
-  const [count, setCount] = useState(0)
+const API_URL = "https://fsa-jwt-practice.herokuapp.com/authenticate";
+
+/**
+ * @component
+ * When the user successfully signs up, a token will be received from API
+ * and stored in state. The presence of a token will then cause the
+ * "Authenticate" button to appear. When that button is clicked, the token
+ * will be sent to /authenticate, and the resulting status will be displayed.
+ */
+export default function App() {
+  const [token, setToken] = useState("");
+  const [status, setStatus] = useState("Please sign up for an account.");
+
+  async function authenticate() {
+    try {
+      const response = await fetch(API_URL, {
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+      });
+      const result = await response.json();
+      setStatus(result.message);
+    } catch (e) {
+      setStatus(e.message);
+    }
+  }
 
   return (
     <>
-      <div>
-        <a href="https://vitejs.dev" target="_blank">
-          <img src={viteLogo} className="logo" alt="Vite logo" />
-        </a>
-        <a href="https://react.dev" target="_blank">
-          <img src={reactLogo} className="logo react" alt="React logo" />
-        </a>
-      </div>
-      <h1>Vite + React</h1>
-      <div className="card">
-        <button onClick={() => setCount((count) => count + 1)}>
-          count is {count}
-        </button>
-        <p>
-          Edit <code>src/App.jsx</code> and save to test HMR
-        </p>
-      </div>
-      <p className="read-the-docs">
-        Click on the Vite and React logos to learn more
-      </p>
+      <SignUpForm setToken={setToken} setStatus={setStatus} />
+      <hr />
+      <p>{status}</p>
+      {token && <button onClick={authenticate}>Authenticate</button>}
     </>
-  )
+  );
 }
-
-export default App
